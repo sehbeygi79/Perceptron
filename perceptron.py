@@ -18,10 +18,6 @@ def do_preprocessings(file_path):
     df['Outcome'] = y_df
     return df
 
-# # todo: maybe 0 should get -1
-# def sign(x):
-#     return 1 if x >= 0 else -1
-
 def do_training(train_df, lr=1):
     x_df = train_df.loc[:, train_df.columns != 'Outcome']
     y_df = train_df['Outcome']
@@ -29,23 +25,13 @@ def do_training(train_df, lr=1):
     d = x_df.shape[1]
     w = np.zeros((d+1,1))
 
-    # print(y_df[582])
-
     for index, row in x_df.iterrows():
         x = np.insert(np.array(row), 0, 1).reshape(-1, 1)
-        # print('index', index)
-        # print(x)
         pred = np.sign(np.dot(x.T, w))
-        # todo: maybe accessing via index is not the right thing to do
-        y = y_df[index]
-        # print(y)
+        y = y_df.loc[index]
         if(pred != y):
-            # print('prev w=', w)
-            print(lr)
             w += lr*y*x
-            # print('after w=', w)
 
-        # break
     return w
 
 def do_test(test_df, w):
@@ -60,7 +46,6 @@ def do_test(test_df, w):
     Y = y_df.values.reshape(-1, 1)
 
     pred = np.sign(np.dot(X, w))
-    # print(pred)
 
     correct_preds = np.sum(pred == Y)
     accuracy = (correct_preds / len(Y)) * 100
@@ -71,7 +56,8 @@ def do_test(test_df, w):
 file_path = 'Dataset.csv'
 df = do_preprocessings(file_path)
 
-train_df=df.sample(frac=0.85,random_state=200)
+seed = 37
+train_df=df.sample(frac=0.85,random_state=seed)
 test_df=df.drop(train_df.index)
 
 weights = do_training(train_df)
